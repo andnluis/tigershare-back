@@ -1,4 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
+import { loginDTO } from './dto/loginDTO';
+import { signupDTO } from './dto/signupDTO';
 import { Usuario } from './schema/usuario.schema';
 import { UsuarioService } from './usuario.service';
 
@@ -6,18 +8,23 @@ import { UsuarioService } from './usuario.service';
 export class UsuarioController {
     constructor(private servicioUsuario: UsuarioService){}
 
+    //Endpoint que retorna todos los usuarios, solo para testear.
     @Get('all')
     async getAllUsers(): Promise<Usuario[]>{
         return this.servicioUsuario.findAll();
     }
 
+    //Endpoint para ingresar sesion 
     @Post('ingresar')
-    async ingresar(@Body() body): Promise<Usuario> {
-        return this.servicioUsuario.findOne(body.email, body.pass)
+    async ingresar(@Body() logindto: loginDTO): Promise<{token: string}> {
+        return this.servicioUsuario.signIn(logindto);
     }
 
+
+    //Endpoint para registrarse en la app
     @Post('registrar')
-    async registrarse(@Body() body): Promise<Usuario> {
+    async registrarse(@Body() signupdto :signupDTO): Promise<{token: string}> {
+        return this.servicioUsuario.signUp(signupdto);
     }
 
 }
