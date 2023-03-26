@@ -18,7 +18,6 @@ export class UsuarioController {
 
     @Post('registrar')
     async registrarse(@Body() body): Promise<Usuario> {
-        return this.servicioUsuario.agregar(body);
     }
 
 }
