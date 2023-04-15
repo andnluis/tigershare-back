@@ -4,18 +4,20 @@ import { Usuario } from './schema/usuario.schema';
 import * as mongoose from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { signupDTO } from './dto/signupDTO';
-import { JwtService } from '@nestjs/jwt'
+import { JwtService } from '@nestjs/jwt';
 import { loginDTO } from './dto/loginDTO';
 import { UnauthorizedException } from '@nestjs/common/exceptions';
 
 @Injectable()
-export class UsuarioService {
-    constructor(@InjectModel(Usuario.name) private usuarioModelo: mongoose.Model<Usuario>, private jwtService: JwtService,){}
+export class UsuarioService {constructor(
+    @InjectModel(Usuario.name) private usuarioModelo: mongoose.Model<Usuario>,
+    private jwtService: JwtService,
+  ) {}
 
-    async findAll():Promise<Usuario[]> {
-        const usuarios = await this.usuarioModelo.find();
-        return usuarios;
-    }
+  async findAll(): Promise<Usuario[]> {
+    const usuarios = await this.usuarioModelo.find();
+    return usuarios;
+  }
 
     async findOne(email:string, pass:string):Promise<Usuario> {
         const usuario = await this.usuarioModelo.findOne({email:email, pass:pass}).exec();
@@ -56,4 +58,17 @@ export class UsuarioService {
 
     }
 
+    async obtenerIDtoken(token: {token:string}) : Promise<string> {
+
+        const res:any = this.jwtService.decode(token.token);
+        let id = res.id;
+        return id;
+    }
+
+    async existeByEmail(correo:string):Promise<Usuario> {
+        const usuario = this.usuarioModelo.findOne({email:correo})
+        return usuario;
+    }
+
+    
 }
