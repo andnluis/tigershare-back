@@ -1,7 +1,9 @@
-import { Body, Controller, Post, Get, Put} from '@nestjs/common';
+import { Body, Controller, Post, Get, Put, Res, Delete} from '@nestjs/common';
 import { ProyectoService } from './proyecto.service';
 import { Proyecto } from './schema/proyecto.schema';
 import { UsuarioService } from 'src/usuario/usuario.service';
+import * as jszip from 'jszip';
+import { Response } from 'express';
 
 @Controller('proyecto')
 export class ProyectoController {
@@ -15,37 +17,55 @@ export class ProyectoController {
 
   //lista todos los proyectos del usuario
   @Get('listar')
-  async listar(@Body() token:string):Promise<Proyecto[]>{
-    const usuario = await this.usuarioServicio.obtenerIDporToken(token);
+  async listar(@Body() body:{token:string}):Promise<Proyecto[]>{
+    const usuario = await this.usuarioServicio.obtenerIDporToken(body.token);
     return this.proyectoService.listarProyectos(usuario);
   }
 
-
   //agregar un colaborador al proyecto
   @Put('colab')
-  async agregarColaborador(@Body() email:string):Promise<void> {
-    const proyecto = this.proyectoService.agregarColaborador(email);
+  async agregarColaborador(@Body() body:{pro_id:string, email:string}):Promise<void> {
+    const proyecto = this.proyectoService.agregarColaborador(body.pro_id, body.email);
   }
 
-  
-  //Actualizar codigo html
-  @Put('actualizar/html')
-  async actualizarHtml(@Body() pro_id:string, html:string):Promise<Proyecto>{
-    const proyecto = this.actualizarHtml(pro_id, html);
-    return proyecto;
+  @Put('actualizar')
+  async actualizarRaiz(@Body() body:{pro_id:string,nuevaRaiz:{html:string, css:string, js:string} }):Promise<Proyecto> {
+    this.proyectoService.actualizarRaiz(body.pro_id, body.nuevaRaiz);
+    return this.proyectoService.obtenerProyectoId(body.pro_id);
+  }
+
+  @Delete('borrar')
+  async borrarProyecto(@Body() body:{pro_id:string}) {
+    this.proyectoService.borrarProyecto(body.pro_id);
   }
   
-  //Actualizar codigo css
-  @Put('actualizar/css')
-  async actualizarCss(@Body() pro_id:string, css:string):Promise<Proyecto>{
-    const proyecto = this.actualizarCss(pro_id, css);
-    return proyecto;
+  @Get('descargar')
+  async descargarProyecto(@Body() pro_id:string, @Res() res: Response ) {
+      const zip = new jszip();
+
+      const raiz = await this.proyectoService.obtenerRaiz(pro_id);
+
+
+      zip.file('index.html',raiz.html);
+      zip.file('styles.css',raiz.css);
+      zip.file('script.js',raiz.js);
+
+      const contenido = await zip.generateAsync({type:'nodebuffer'});
+
+      res.set({
+        'Content-type':'application/zip',
+        'Content-Disposition':'attachment=files.zip'
+      });
+
+      res.send(contenido);
   }
-  
-  //Actualizar codigo js
-  @Put('actualizar/js')
-  async actualizarJs(@Body() pro_is:string , js:string):Promise<Proyecto>{
-    const proyecto = this.actualizarJs(pro_is, js);
-    return proyecto;
+
+
+  @Get('raiz')
+  async obtenerRaiz(@Body() body:{pro_id:string}):Promise<Object> {
+     const res = this.proyectoService.obtenerRaiz(body.pro_id);
+     return (await res).html;
   }
+
+
 }

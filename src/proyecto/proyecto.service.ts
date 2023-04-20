@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Proyecto } from './schema/proyecto.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
 import { UsuarioService } from 'src/usuario/usuario.service';
-import { Usuario } from 'src/usuario/schema/usuario.schema';
+import * as mongoose from 'mongoose';
 
 @Injectable()
 export class ProyectoService {
@@ -15,13 +14,14 @@ export class ProyectoService {
 
 
     //Funcion para crear un nuevo proyecto
-    async crearProyecto(id:string, nombre:string):Promise<Proyecto> {
-       const usuarioCreador = this.servicioUsuario.obtenerPorID(id);
+    async crearProyecto(token:string, nombre:string):Promise<Proyecto> {
+       const id = await this.servicioUsuario.obtenerIDporToken(token);
+       const usuario = await this.servicioUsuario.obtenerPorID(id);
         const proyecto = await this.modeloProyecto.create({
             f_crea:this.date,
             u_mod:this.date,
             colaboradores: [],
-            creador: usuarioCreador,
+            creador: usuario,
             raiz: {html:'',css:'',js:''},
             nombre:nombre
         })
@@ -35,39 +35,40 @@ export class ProyectoService {
     }
 
     //funcion para listar los proyectos que el usuario tenga
-    async listarProyectos(usuario:string): Promise<Proyecto[]> {
-        const proyectos = this.modeloProyecto.find({_id:usuario})
+    async listarProyectos(id:string): Promise<Proyecto[]> {
+        const oid = new mongoose.mongo.ObjectId(id);
+        const proyectos = await this.modeloProyecto.find({creador:oid})
+        console.log(id)
+        console.log(proyectos);
         return proyectos;
     }
 
 
     //agregar colaborador
-    async agregarColaborador(email:string):Promise<any> {
-        const usuario = this.servicioUsuario.obtenerPorEmail(email);
-        const proyecto = this.modeloProyecto.updateOne({email:email},{$push:{colaboradores:usuario}});
+    async agregarColaborador(pro_id:string,email:string):Promise<any> {
+        const oid_pro = new mongoose.mongo.ObjectId(pro_id);//ObjectID del proyecto
+        const id_usr = await this.servicioUsuario.obtenerIdPorEmail(email);
+        const oid_usr = new mongoose.mongo.ObjectId(id_usr);
+        const proyecto = this.modeloProyecto.updateOne({_id:oid_pro},{$push:{colaboradores:oid_usr}});
         return proyecto;
     }
 
-    //actualizar html
-    async actualizarHtml(pro_id:string, html_nuevo:string):Promise<Proyecto> {
-        this.modeloProyecto.updateOne({_id:pro_id},{u_mod:this.date, $set: {raiz:{html:html_nuevo}}});
-        const proyecto = this.obtenerProyectoId(pro_id);
-        return proyecto;
-    }
-    //actualizar css
-    async actualizarCss(pro_id:string, css_nuevo:string):Promise<Proyecto> {
-        this.modeloProyecto.updateOne({_id:pro_id},{u_mod:this.date, $set: {raiz:{css:css_nuevo}}});
-        const proyecto = this.obtenerProyectoId(pro_id);
-        return proyecto;
-    }
-    //actualizar js
-    async actualizarJs(pro_id:string, js_nuevo:string):Promise<Proyecto> {
-        this.modeloProyecto.updateOne({_id:pro_id},{u_mod:this.date, $set: {raiz:{js:js_nuevo}}});
-        const proyecto = this.obtenerProyectoId(pro_id);
-        return proyecto;
+    async actualizarRaiz(pro_id:string, nuevaRaiz:{html:string, css:string, js:string}) {
+        const raiz = this.modeloProyecto.findByIdAndUpdate(pro_id,{
+            $set:{'raiz':nuevaRaiz},u_mod:this.date
+        });
+        return raiz;
+
     }
 
+    async borrarProyecto(pro_id:string) {
+        this.modeloProyecto.findByIdAndDelete(pro_id);
+    }
 
-
+    //descargar archivos a zip
+    async obtenerRaiz(pro_id:string){
+       const proyecto = await this.modeloProyecto.findById(pro_id);
+       return proyecto.raiz;
+    }
 
 }

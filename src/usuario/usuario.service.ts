@@ -7,6 +7,7 @@ import { signupDTO } from './dto/signupDTO';
 import { JwtService } from '@nestjs/jwt'
 import { loginDTO } from './dto/loginDTO';
 import { UnauthorizedException } from '@nestjs/common/exceptions';
+import { Proyecto } from 'src/proyecto/schema/proyecto.schema';
 
 @Injectable()
 export class UsuarioService {
@@ -54,6 +55,26 @@ export class UsuarioService {
 
         return { token }; //devolucion de token
 
+    }
+
+    async obtenerPorID(id:string):Promise<Usuario> {
+        const usuario = await this.usuarioModelo.findById(id);
+        return usuario;
+    }
+
+    async obtenerPorEmail(email:string):Promise<Usuario> {
+        const usuario = await this.usuarioModelo.findOne({email:email});
+        return usuario;
+    }
+
+    async obtenerIdPorEmail(email:string):Promise<string> {
+        const response = await this.usuarioModelo.findOne({email:email},{_id:1});
+        return response.id;
+    }
+
+    async obtenerIDporToken(token:string):Promise<string> {
+        const decode = this.jwtService.verify(token);
+        return decode.id;
     }
 
 }

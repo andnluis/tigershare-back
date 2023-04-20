@@ -1,5 +1,6 @@
 import { Schema , Prop, SchemaFactory} from "@nestjs/mongoose";
 import { Usuario } from "src/usuario/schema/usuario.schema";
+import * as mongoose from 'mongoose';
 
 @Schema({versionKey:false})
 export class Proyecto {
@@ -10,14 +11,18 @@ export class Proyecto {
     @Prop()
     u_mod:Date;
     
-    @Prop()
+    @Prop({type: Array<mongoose.Types.ObjectId> , ref: 'Usuario'})
     colaboradores:Array<Usuario>;
     
-    @Prop()
+    @Prop({type: mongoose.Types.ObjectId , ref: 'Usuario'})
     creador:Usuario;
     
     @Prop({type:Object})
-    raiz:Object;
+    raiz:{
+        html:string;
+        css:string;
+        js:string;
+    }
     
     @Prop()
     nombre:string;
