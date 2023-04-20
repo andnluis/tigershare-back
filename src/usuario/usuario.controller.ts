@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { loginDTO } from './dto/loginDTO';
 import { signupDTO } from './dto/signupDTO';
 import { Usuario } from './schema/usuario.schema';
@@ -20,8 +20,7 @@ export class UsuarioController {
         return this.servicioUsuario.signIn(logindto);
     }
 
-
-    //Endpoint para registrarse en la app
+  //Endpoint para registrarse en la app
     @Post('registrar')
     async registrarse(@Body() signupdto :signupDTO): Promise<{token: string}> {
         return this.servicioUsuario.signUp(signupdto);
