@@ -1,59 +1,74 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
+import { Injectable } from '@nestjs/common';
 import { Proyecto } from './schema/proyecto.schema';
+import { InjectModel } from '@nestjs/mongoose';
 import { UsuarioService } from 'src/usuario/usuario.service';
+import * as mongoose from 'mongoose';
 
 @Injectable()
 export class ProyectoService {
 
     date = new Date();
 
-    constructor(
-       @InjectModel(Proyecto.name) private proyectoModelo: mongoose.Model<Proyecto>,
-       private servicioUsuario: UsuarioService
-    ){}
+    //Constructor en el que se instancia el modelo de mongoose
+    constructor(@InjectModel(Proyecto.name) private modeloProyecto:mongoose.Model<Proyecto>, private servicioUsuario:UsuarioService){}
 
-    // funcion para crear un royecto
-    async crearProyecto (identificador: string, token:{token:string}) : Promise<Proyecto> {
-        const proyecto = await this.proyectoModelo.create({
-            'identificador': identificador, 'f_crea': this.date.getDate(), 'u_mod':this.date.getDate(),
-            'colaboradores': [],
-            'creador':this.servicioUsuario.obtenerIDtoken(token),
-            'raiz': {}
+
+    //Funcion para crear un nuevo proyecto
+    async crearProyecto(token:string, nombre:string):Promise<Proyecto> {
+       const id = await this.servicioUsuario.obtenerIDporToken(token);
+       const usuario = await this.servicioUsuario.obtenerPorID(id);
+        const proyecto = await this.modeloProyecto.create({
+            f_crea:this.date,
+            u_mod:this.date,
+            colaboradores: [],
+            creador: usuario,
+            raiz: {html:'',css:'',js:''},
+            nombre:nombre
         })
         return proyecto;
-    } 
+    }
 
-    //funcion que retorna todos los proyectos de un usuario
-    async listarProyectosUsuario(token:{token:string}): Promise<Array<Proyecto>> {
-        let id_usuario = this.servicioUsuario.obtenerIDtoken(token);
-        let proyectos: Array<Proyecto>
-        proyectos = await this.proyectoModelo.find({creador: new mongoose.Types.ObjectId(await id_usuario)});
+    //funcion para obtener un proyecto a partir de su id
+    async obtenerProyectoId(id:string):Promise<Proyecto> {
+        const proyecto = this.modeloProyecto.findOne({_id:id});
+        return proyecto;
+    }
+
+    //funcion para listar los proyectos que el usuario tenga
+    async listarProyectos(id:string): Promise<Proyecto[]> {
+        const oid = new mongoose.mongo.ObjectId(id);
+        const proyectos = await this.modeloProyecto.find({creador:oid})
+        console.log(id)
+        console.log(proyectos);
         return proyectos;
     }
 
-    //funcion para agregar un colaborador al proyecto
-    async agregarColaborador(proyecto_id:mongoose.Types.ObjectId, email_colab:string):Promise<mongoose.mongo.UpdateResult>{
-        const colaborador = this.servicioUsuario.existeByEmail(email_colab);
-        const proyecto = await this.proyectoModelo.updateOne({_id:proyecto_id},{$push: {colaboradores: colaborador}})
+
+    //agregar colaborador
+    async agregarColaborador(pro_id:string,email:string):Promise<any> {
+        const oid_pro = new mongoose.mongo.ObjectId(pro_id);//ObjectID del proyecto
+        const id_usr = await this.servicioUsuario.obtenerIdPorEmail(email);
+        const oid_usr = new mongoose.mongo.ObjectId(id_usr);
+        const proyecto = this.modeloProyecto.updateOne({_id:oid_pro},{$push:{colaboradores:oid_usr}});
         return proyecto;
     }
 
-    //funcion para agregar archivos html, js y css
-    async actualizar(proyecto_id:mongoose.Types.ObjectId, html?:string, css?:string, js?:string):Promise<mongoose.mongo.UpdateResult> {
-        const raiz = {
-            'html':html,
-            'css':css,
-            'js':js
-        }
-        const proyecto = await this.proyectoModelo.updateOne({_id:proyecto_id},{
-            u_mod:this.date.getDate(),raiz:raiz
-        })
-        return proyecto;
+    async actualizarRaiz(pro_id:string, nuevaRaiz:{html:string, css:string, js:string}) {
+        const raiz = this.modeloProyecto.findByIdAndUpdate(pro_id,{
+            $set:{'raiz':nuevaRaiz},u_mod:this.date
+        });
+        return raiz;
+
     }
 
-   
+    async borrarProyecto(pro_id:string) {
+        this.modeloProyecto.findByIdAndDelete(pro_id);
+    }
 
+    //descargar archivos a zip
+    async obtenerRaiz(pro_id:string){
+       const proyecto = await this.modeloProyecto.findById(pro_id);
+       return proyecto.raiz;
+    }
 
 }

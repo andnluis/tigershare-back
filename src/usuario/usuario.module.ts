@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { UsuarioController } from './usuario.controller';
 import { UsuarioService } from './usuario.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UsuarioSchema } from './schema/usuario.schema';
+import { Usuario, UsuarioSchema } from './schema/usuario.schema';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -23,6 +23,6 @@ import { JwtStrategy } from './jwt.strategy';
   })],
   controllers: [UsuarioController],
   providers: [UsuarioService, JwtStrategy],
-  exports: [JwtStrategy, PassportModule]
+  exports: [JwtStrategy, PassportModule, UsuarioService]
 })
 export class UsuarioModule {}

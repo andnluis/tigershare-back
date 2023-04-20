@@ -4,20 +4,19 @@ import { Usuario } from './schema/usuario.schema';
 import * as mongoose from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { signupDTO } from './dto/signupDTO';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt'
 import { loginDTO } from './dto/loginDTO';
 import { UnauthorizedException } from '@nestjs/common/exceptions';
+import { Proyecto } from 'src/proyecto/schema/proyecto.schema';
 
 @Injectable()
-export class UsuarioService {constructor(
-    @InjectModel(Usuario.name) private usuarioModelo: mongoose.Model<Usuario>,
-    private jwtService: JwtService,
-  ) {}
+export class UsuarioService {
+    constructor(@InjectModel(Usuario.name) private usuarioModelo: mongoose.Model<Usuario>, private jwtService: JwtService,){}
 
-  async findAll(): Promise<Usuario[]> {
-    const usuarios = await this.usuarioModelo.find();
-    return usuarios;
-  }
+    async findAll():Promise<Usuario[]> {
+        const usuarios = await this.usuarioModelo.find();
+        return usuarios;
+    }
 
     async findOne(email:string, pass:string):Promise<Usuario> {
         const usuario = await this.usuarioModelo.findOne({email:email, pass:pass}).exec();
@@ -58,17 +57,24 @@ export class UsuarioService {constructor(
 
     }
 
-    async obtenerIDtoken(token: {token:string}) : Promise<string> {
-
-        const res:any = this.jwtService.decode(token.token);
-        let id = res.id;
-        return id;
-    }
-
-    async existeByEmail(correo:string):Promise<Usuario> {
-        const usuario = this.usuarioModelo.findOne({email:correo})
+    async obtenerPorID(id:string):Promise<Usuario> {
+        const usuario = await this.usuarioModelo.findById(id);
         return usuario;
     }
 
-    
+    async obtenerPorEmail(email:string):Promise<Usuario> {
+        const usuario = await this.usuarioModelo.findOne({email:email});
+        return usuario;
+    }
+
+    async obtenerIdPorEmail(email:string):Promise<string> {
+        const response = await this.usuarioModelo.findOne({email:email},{_id:1});
+        return response.id;
+    }
+
+    async obtenerIDporToken(token:string):Promise<string> {
+        const decode = this.jwtService.verify(token);
+        return decode.id;
+    }
+
 }
