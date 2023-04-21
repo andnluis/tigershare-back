@@ -71,4 +71,10 @@ export class ProyectoService {
        return proyecto.raiz;
     }
 
+    async obtenerProyectosColaborador(id:string):Promise<Proyecto[]> {
+        const oid = new mongoose.mongo.ObjectId(id);
+        const proyectos = this.modeloProyecto.find({colaboradores:{$elemMatch:{$eq:oid}}});
+        return proyectos;
+    }
+
 }

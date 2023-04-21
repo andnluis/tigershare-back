@@ -41,10 +41,10 @@ export class ProyectoController {
   }
   
   @Get('descargar')
-  async descargarProyecto(@Body() pro_id:string, @Res() res: Response ) {
+  async descargarProyecto(@Body() body:{pro_id:string}, @Res() res: Response ) {
       const zip = new jszip();
 
-      const raiz = await this.proyectoService.obtenerRaiz(pro_id);
+      const raiz = await this.proyectoService.obtenerRaiz(body.pro_id);
 
 
       zip.file('index.html',raiz.html);
@@ -68,5 +68,12 @@ export class ProyectoController {
      return (await res).html;
   }
 
+  //Obtiene todos los proyectos en los cuales uno ha colaborado
+  @Get('encolab')
+  async obtenerProyectosColaboracion(@Body() body:{token:string}) {
+    const id = await this.usuarioServicio.obtenerIDporToken(body.token);
+    return this.proyectoService.obtenerProyectosColaborador(id);
+
+  }
 
 }
