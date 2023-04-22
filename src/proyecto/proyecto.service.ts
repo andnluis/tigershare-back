@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { Proyecto } from './schema/proyecto.schema';
 import { InjectModel } from '@nestjs/mongoose';
@@ -15,8 +16,8 @@ export class ProyectoService {
 
     //Funcion para crear un nuevo proyecto
     async crearProyecto(token:string, nombre:string):Promise<Proyecto> {
-       const id = await this.servicioUsuario.obtenerIDporToken(token);
-       const usuario = await this.servicioUsuario.obtenerPorID(id);
+        const id = await this.servicioUsuario.obtenerIDporToken(token);
+        const usuario = await this.servicioUsuario.obtenerPorID(id);
         const proyecto = await this.modeloProyecto.create({
             f_crea:this.date,
             u_mod:this.date,
@@ -67,8 +68,8 @@ export class ProyectoService {
 
     //descargar archivos a zip
     async obtenerRaiz(pro_id:string){
-       const proyecto = await this.modeloProyecto.findById(pro_id);
-       return proyecto.raiz;
+        const proyecto = await this.modeloProyecto.findById(pro_id);
+        return proyecto.raiz;
     }
 
     async obtenerProyectosColaborador(id:string):Promise<Proyecto[]> {

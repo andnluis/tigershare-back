@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Schema , Prop, SchemaFactory} from "@nestjs/mongoose";
 import { Usuario } from "src/usuario/schema/usuario.schema";
 import * as mongoose from 'mongoose';
