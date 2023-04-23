@@ -31,8 +31,7 @@ export class ProyectoService {
 
     //funcion para obtener un proyecto a partir de su id
     async obtenerProyectoId(id:string):Promise<Proyecto> {
-        const proyecto = this.modeloProyecto.findOne({_id:id});
-        return proyecto;
+        return await this.modeloProyecto.findOne({_id:id});
     }
 
     //funcion para listar los proyectos que el usuario tenga
@@ -55,11 +54,11 @@ export class ProyectoService {
     }
 
     async actualizarRaiz(pro_id:string, nuevaRaiz:{html:string, css:string, js:string}) {
+        console.log(nuevaRaiz);
         const raiz = this.modeloProyecto.findByIdAndUpdate(pro_id,{
             $set:{'raiz':nuevaRaiz},u_mod:this.date
         });
         return raiz;
-
     }
 
     async borrarProyecto(pro_id:string) {
