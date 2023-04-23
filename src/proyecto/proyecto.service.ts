@@ -31,7 +31,9 @@ export class ProyectoService {
 
     //funcion para obtener un proyecto a partir de su id
     async obtenerProyectoId(id:string):Promise<Proyecto> {
-        return await this.modeloProyecto.findOne({_id:id});
+        const oid = new mongoose.mongo.ObjectId(id);
+        const proyecto = await this.modeloProyecto.findOne(oid).populate('creador');
+        return proyecto;
     }
 
     //funcion para listar los proyectos que el usuario tenga
