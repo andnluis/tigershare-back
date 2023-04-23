@@ -35,9 +35,10 @@ export class ProyectoController {
         return this.proyectoService.obtenerProyectoId(body.pro_id);
     }
 
-    @Delete('borrar')
-    async borrarProyecto(@Body() body: { pro_id: string }) {
-        this.proyectoService.borrarProyecto(body.pro_id);
+    @Delete('borrar/:pro_id')
+    async borrarProyecto(@Param('pro_id') pro_id: string) {
+        await this.proyectoService.borrarProyecto(pro_id);
+        return { mensaje: 'Proyecto borrado' };
     }
 
     @Get('descargar')

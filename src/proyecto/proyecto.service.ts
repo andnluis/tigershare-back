@@ -63,7 +63,7 @@ export class ProyectoService {
     }
 
     async borrarProyecto(pro_id:string) {
-        this.modeloProyecto.findByIdAndDelete(pro_id);
+        await this.modeloProyecto.findByIdAndDelete(pro_id);
     }
 
     //descargar archivos a zip
