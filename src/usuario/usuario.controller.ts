@@ -1,9 +1,10 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { loginDTO } from './dto/loginDTO';
 import { signupDTO } from './dto/signupDTO';
 import { Usuario } from './schema/usuario.schema';
 import { UsuarioService } from './usuario.service';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('usr')
 export class UsuarioController {
@@ -26,5 +27,19 @@ export class UsuarioController {
     async registrarse(@Body() signupdto :signupDTO): Promise<{token: string}> {
         return this.servicioUsuario.signUp(signupdto);
     }
+
+    @Get('facebook')
+    @UseGuards(AuthGuard('facebook'))
+    async facebookLogin(){
+
+    }
+
+    @Get('facebook/callback')
+    @UseGuards(AuthGuard('facebook'))
+    async facebookLoginCallback(@Req() req){
+        return 'somehow we got here';
+    }
+
+
 
 }
