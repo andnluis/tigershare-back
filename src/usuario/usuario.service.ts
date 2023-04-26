@@ -58,6 +58,22 @@ export class UsuarioService {
 
     }
 
+    async encontrarOCrear(profile):Promise<Usuario> {
+        const usuario = await this.usuarioModelo.findOne({email:profile.email});
+        if (usuario) {
+            return usuario;
+        }
+        const nuevoUsuario = await this.usuarioModelo.create({
+            nombre: profile.name.givenName,
+            apellido: profile.name.familyName,
+            user: profile.username,
+            email: profile.emails[0].value,
+            plan: 'Rookie',
+            fnac: profile.birthday
+        })
+        return nuevoUsuario;
+    }
+
     async obtenerPorID(id:string):Promise<Usuario> {
         const usuario = await this.usuarioModelo.findById(id);
         return usuario;
