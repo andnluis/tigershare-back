@@ -66,12 +66,21 @@ export class UsuarioService {
         const nuevoUsuario = await this.usuarioModelo.create({
             nombre: profile.name.givenName,
             apellido: profile.name.familyName,
-            user: profile.username,
+            user: profile.givenName+profile.familyName,
             email: profile.emails[0].value,
             plan: 'Rookie',
             fnac: profile.birthday
         })
         return nuevoUsuario;
+    }
+
+    async facebookLogin(req):Promise<{token:string}> {
+        if(!req.usuario) {
+            return { token: 'No hay usuario de facebook'}
+        }
+
+        const token = this.jwtService.sign({id:req.usuario._id})
+        return { token };
     }
 
     async obtenerPorID(id:string):Promise<Usuario> {

@@ -31,13 +31,12 @@ export class UsuarioController {
     @Get('facebook')
     @UseGuards(AuthGuard('facebook'))
     async facebookLogin(){
-
     }
 
     @Get('facebook/callback')
     @UseGuards(AuthGuard('facebook'))
     async facebookLoginCallback(@Req() req){
-        return 'somehow we got here';
+        return this.servicioUsuario.facebookLogin(req);
     }
 
     @Get(':token')
