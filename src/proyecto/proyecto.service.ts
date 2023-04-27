@@ -4,6 +4,7 @@ import { Proyecto } from './schema/proyecto.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { UsuarioService } from 'src/usuario/usuario.service';
 import * as mongoose from 'mongoose';
+import { Usuario } from 'src/usuario/schema/usuario.schema';
 
 @Injectable()
 export class ProyectoService {
@@ -40,8 +41,6 @@ export class ProyectoService {
     async listarProyectos(id:string): Promise<Proyecto[]> {
         const oid = new mongoose.mongo.ObjectId(id);
         const proyectos = await this.modeloProyecto.find({creador:oid})
-        console.log(id)
-        console.log(proyectos);
         return proyectos;
     }
 
@@ -56,7 +55,6 @@ export class ProyectoService {
     }
 
     async actualizarRaiz(pro_id:string, nuevaRaiz:{html:string, css:string, js:string}) {
-        console.log(nuevaRaiz);
         const raiz = this.modeloProyecto.findByIdAndUpdate(pro_id,{
             $set:{'raiz':nuevaRaiz},u_mod:this.date
         });
@@ -77,6 +75,32 @@ export class ProyectoService {
         const oid = new mongoose.mongo.ObjectId(id);
         const proyectos = this.modeloProyecto.find({colaboradores:{$elemMatch:{$eq:oid}}});
         return proyectos;
+    }
+
+    async ultimosTresProyectos(id:string):Promise<Proyecto[]> {
+        const oid = new mongoose.mongo.ObjectId(id);
+        const proyectos = this.modeloProyecto.aggregate([
+            {$match: {creador:oid}},
+            {$sort: {u_mod:-1}},
+            {$limit: 3}
+        ]);
+
+        return proyectos;
+    }
+
+
+    async listarColaboradores(pro_id:string) {
+        const oid = new mongoose.mongo.ObjectId(pro_id);
+        const usuarios = await this.modeloProyecto.find({_id:oid},{_id:0,colaboradores:1});
+        return usuarios;
+    }
+
+    async eliminarColaborador(pro_id:string, usuario_id:string) {
+        const p_oid = new mongoose.mongo.ObjectId(pro_id);
+        const u_oiod = new mongoose.mongo.ObjectId(usuario_id);
+        const proyecto = await this.modeloProyecto.updateOne({_id:p_oid},
+            {$pull: {colaboradores: u_oiod}});
+        return proyecto;
     }
 
 }

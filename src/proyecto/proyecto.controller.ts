@@ -81,4 +81,23 @@ export class ProyectoController {
         return this.proyectoService.obtenerProyectosColaborador(id);
     }
 
+    @Get('/top/:token')
+    async ultimosTresProyectos(@Param('token') token:string):Promise<Proyecto[]> {
+        const id = await this.usuarioServicio.obtenerIDporToken(token);
+        const proyectos = await this.proyectoService.ultimosTresProyectos(id);
+        return proyectos;
+    }
+
+    @Get('/colab/list/:pro_id')
+    async listarColaboradores(@Param('pro_id') pro_id:string) {
+        const colaboradores = this.proyectoService.listarColaboradores(pro_id);
+        return colaboradores;
+    }
+    
+    @Put('colab/eliminar')
+    async eliminarColaborador(@Body() body:{pro_id:string, usuario_id:string}) {
+        const proyecto = await this.proyectoService.eliminarColaborador(body.pro_id, body.usuario_id);
+        return proyecto;
+    }
+
 }

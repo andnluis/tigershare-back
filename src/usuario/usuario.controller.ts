@@ -40,6 +40,13 @@ export class UsuarioController {
         return 'somehow we got here';
     }
 
+    @Get(':token')
+    async obtenerDatos(@Param('token') token:string): Promise<Usuario> {
+        const id = await this.servicioUsuario.obtenerIDporToken(token);
+        const usuario = await this.servicioUsuario.obtenerPorID(id);
+        return usuario;
+    }
+
 
 
 }
