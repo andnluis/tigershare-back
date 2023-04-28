@@ -75,9 +75,9 @@ export class ProyectoController {
     }
 
     //Obtiene todos los proyectos en los cuales uno ha colaborado
-    @Get('encolab')
-    async obtenerProyectosColaboracion(@Body() body: { token: string }) {
-        const id = await this.usuarioServicio.obtenerIDporToken(body.token);
+    @Get('encolab/:token')
+    async obtenerProyectosColaboracion(@Param('token') token:string) {
+        const id = await this.usuarioServicio.obtenerIDporToken(token);
         return this.proyectoService.obtenerProyectosColaborador(id);
     }
 
