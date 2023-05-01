@@ -4,7 +4,7 @@ import { Proyecto } from './schema/proyecto.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { UsuarioService } from 'src/usuario/usuario.service';
 import * as mongoose from 'mongoose';
-import { Usuario } from 'src/usuario/schema/usuario.schema';
+import { Plan, Usuario } from 'src/usuario/schema/usuario.schema';
 
 @Injectable()
 export class ProyectoService {
@@ -101,6 +101,52 @@ export class ProyectoService {
         const proyecto = await this.modeloProyecto.updateOne({_id:p_oid},
             {$pull: {colaboradores: u_oiod}});
         return proyecto;
+    }
+
+    async cantidadProyectos(id:string){
+        const oid = new mongoose.mongo.ObjectId(id);
+        const cantidad = await this.modeloProyecto.countDocuments({creador:oid});
+        return cantidad;
+    }
+
+
+    async puedeCrearProyecto(token:string):Promise<boolean> {
+        const payload = await this.servicioUsuario.obtenerPayload(token);
+        const cantidad = await this.cantidadProyectos(payload.id);
+        if(payload.plan == Plan.ROOKIE){
+            return cantidad <= 50 ? true : false;
+        } else if (payload.plan == Plan.ALLY) {
+            return cantidad <= 30 ? true : false; 
+        }else {
+            return cantidad <= 15 ? true : false;
+        }
+    }
+
+    async puedeAgregarColaboradores(token: string, pro_id):Promise<boolean> {
+        const payload = await this.servicioUsuario.obtenerPayload(token);
+        const oid = new mongoose.mongo.ObjectId(pro_id);
+        if(payload.plan == Plan.ROOKIE){
+            return false;
+        }
+        const cantidad = await this.modeloProyecto.aggregate([
+            {$match: {
+              _id:oid
+            }},{
+              $project: {
+                _id:0,
+                cantidad: {$size: "$colaboradores"},
+              }
+            }  
+          ])
+
+        if(payload.plan == Plan.ELITE) {
+            return cantidad[0].cantidad <= 10 ? true : false;
+        }
+
+        return cantidad[0].cantidad <= 3 ? true : false;
+
+
+
     }
 
 }

@@ -32,7 +32,7 @@ export class UsuarioService {
             nombre, apellido, user, email, plan, fnac, pass: hashedPass,
         });
         //creacion de token de sesion
-        const token = this.jwtService.sign({id: usuario._id})
+        const token = this.jwtService.sign({id: usuario._id, plan: usuario.plan})
         return {token}; //devolucion de token
     }
 
@@ -49,7 +49,7 @@ export class UsuarioService {
 
         const passConcuerda = await bcrypt.compare(pass,usuario.pass); // Verifica si las contraseñas son iguales
         if(passConcuerda) {
-            token = this.jwtService.sign({id:usuario._id});
+            token = this.jwtService.sign({id:usuario._id, plan:usuario.plan});
         }else{
             throw new UnauthorizedException('Correo invalido o contraseña invalido');
         }
@@ -101,6 +101,13 @@ export class UsuarioService {
     async obtenerIDporToken(token:string):Promise<string> {
         const decode = this.jwtService.verify(token);
         return decode.id;
+    }
+
+    async obtenerPayload (token:string): Promise<{
+        id:string, plan:string, iat:number, exp: number
+    }> {
+        const payload = this.jwtService.verify(token);
+        return payload;
     }
 
 }

@@ -12,8 +12,11 @@ export class ProyectoController {
 
     //Ruta para crear un nuevo proyecto
     @Post('crear')
-    async crearNuevoProyecto(@Body() body: { token: string, nombre: string }): Promise<Proyecto> {
-        return this.proyectoService.crearProyecto(body.token, body.nombre)
+    async crearNuevoProyecto(@Body() body: { token: string, nombre: string }): Promise<Proyecto | {mensaje: string}> {
+       if(await this.proyectoService.puedeCrearProyecto(body.token)){
+           return this.proyectoService.crearProyecto(body.token, body.nombre)
+       }
+       return { mensaje: 'Tu plan no te permite crear más proyectos.'}
     }
 
     @Get('obtener/:pro_id')
@@ -30,9 +33,12 @@ export class ProyectoController {
 
     //agregar un colaborador al proyecto
     @Put('colab')
-    async agregarColaborador(@Body() body: { pro_id: string, email: string }): Promise<void> {
-        const proyecto = await this.proyectoService.agregarColaborador(body.pro_id, body.email);
-        return proyecto;
+    async agregarColaborador(@Body() body: { token: string, pro_id: string, email: string }): Promise<void | {mensaje: string}> {
+       if(await this.proyectoService.puedeAgregarColaboradores(body.token, body.pro_id)){
+           const proyecto = await this.proyectoService.agregarColaborador(body.pro_id, body.email);
+           return proyecto;
+       }
+       return {mensaje: 'Su plan ya no le permite tener colaboradores'}
     }
 
     @Put('actualizar/:pro_id')//body: { nuevaRaiz: { html: string, css: string, js: string } }
