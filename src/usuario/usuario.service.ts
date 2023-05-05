@@ -107,11 +107,12 @@ export class UsuarioService {
         return payload;
     }
     
-    async actualizarDatos(token: string, nombre:string, apellido:string, email: string, plan: string){
+    async actualizarDatos(token: string, user: string,nombre:string, apellido:string, email: string, plan: string){
         const id = await this.obtenerIDporToken(token);
         const oid = new mongoose.mongo.ObjectId(id); //Object Id del proyecto
         const usuario = this.usuarioModelo.updateOne({_id:oid},
             {
+                user: user,
                 nombre: nombre,
                 apellido: apellido, 
                 email: email,

@@ -44,9 +44,9 @@ export class UsuarioController {
     }
 
 
-    @Put('actualizar')
-    async actualizarDatos(@Param('token') token:string, @Body() body) {
-        const usuario = await this.servicioUsuario.actualizarDatos(token, body.nombre, body.apellido, body.email, body.plan);
+    @Put('actualizar/:token')
+    async actualizarDatos(@Param('token') token:string, @Body() body: any) {
+        const usuario = await this.servicioUsuario.actualizarDatos(token, body.user, body.nombre, body.apellido, body.email, body.plan);
         return usuario;
     }
 
