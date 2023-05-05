@@ -1,10 +1,12 @@
 /* eslint-disable prettier/prettier */
-import { Body, Param, Controller, Post, Get, Put, Res, Delete } from '@nestjs/common';
+import { Body, Param, Controller, Post, Get, Put, Res, Delete, Headers } from '@nestjs/common';
 import { ProyectoService } from './proyecto.service';
 import { Proyecto } from './schema/proyecto.schema';
 import { UsuarioService } from 'src/usuario/usuario.service';
 import * as jszip from 'jszip';
 import { Response } from 'express';
+import { Usuario } from 'src/usuario/schema/usuario.schema';
+import { datosPerfil } from 'src/usuario/dto/datosPerfilDTO';
 
 @Controller('proyecto')
 export class ProyectoController {
@@ -33,12 +35,11 @@ export class ProyectoController {
 
     //agregar un colaborador al proyecto
     @Put('colab')
-    async agregarColaborador(@Body() body: { token: string, pro_id: string, email: string }): Promise<void | {mensaje: string}> {
+    async agregarColaborador(@Body() body: { token: string, pro_id: string, email: string }): Promise<Boolean> {
        if(await this.proyectoService.puedeAgregarColaboradores(body.token, body.pro_id)){
-           const proyecto = await this.proyectoService.agregarColaborador(body.pro_id, body.email);
-           return proyecto;
+           return await this.proyectoService.agregarColaborador(body.pro_id, body.email);
        }
-       return {mensaje: 'Su plan ya no le permite tener colaboradores'}
+       return false;
     }
 
     @Put('actualizar/:pro_id')//body: { nuevaRaiz: { html: string, css: string, js: string } }
@@ -106,4 +107,11 @@ export class ProyectoController {
         return proyecto;
     }
 
+    
+    @Get('/datos/usuario')
+    async obtenerDatos(@Headers() headers): Promise<datosPerfil> {
+        return await this.proyectoService.datosUsuario(headers.token);
+    }
+
+    
 }

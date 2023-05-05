@@ -8,6 +8,7 @@ import { ProyectoSchema } from './schema/proyecto.schema';
 @Module({
   imports: [UsuarioModule, MongooseModule.forFeature([{name:'Proyecto', schema:ProyectoSchema}])],
   controllers: [ProyectoController],
-  providers: [ProyectoService]
+  providers: [ProyectoService],
+  exports: [ProyectoService]
 })
 export class ProyectoModule {}

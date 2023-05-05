@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { UsuarioService } from 'src/usuario/usuario.service';
 import * as mongoose from 'mongoose';
 import { Plan, Usuario } from 'src/usuario/schema/usuario.schema';
+import { datosPerfil } from 'src/usuario/dto/datosPerfilDTO';
 
 @Injectable()
 export class ProyectoService {
@@ -46,12 +47,15 @@ export class ProyectoService {
 
 
     //agregar colaborador
-    async agregarColaborador(pro_id:string,email:string):Promise<any> {
+    async agregarColaborador(pro_id:string,email:string):Promise<Boolean> {
         const oid_pro = new mongoose.mongo.ObjectId(pro_id);//ObjectID del proyecto
         const id_usr = await this.servicioUsuario.obtenerIdPorEmail(email);
-        const oid_usr = new mongoose.mongo.ObjectId(id_usr);
-        const proyecto = this.modeloProyecto.updateOne({_id:oid_pro},{$push:{colaboradores:oid_usr}});
-        return proyecto;
+        if(id_usr){
+            const oid_usr = new mongoose.mongo.ObjectId(id_usr);
+            this.modeloProyecto.updateOne({_id:oid_pro},{$push:{colaboradores:oid_usr}});
+            return true;
+        }
+        return false;
     }
 
     async actualizarRaiz(pro_id:string, nuevaRaiz:{html:string, css:string, js:string}) {
@@ -146,7 +150,26 @@ export class ProyectoService {
         return cantidad[0].cantidad <= 3 ? true : false;
 
 
-
     }
+
+    async datosUsuario(token:string):Promise<datosPerfil>{
+        const id = await this.servicioUsuario.obtenerIDporToken(token);
+        const respuesta = new datosPerfil;
+        const usuario = await this.servicioUsuario.obtenerPorID(id);
+        respuesta.nombre = usuario.nombre;
+        respuesta.apellido = usuario.apellido;
+        respuesta.plan = usuario.plan;
+        respuesta.cantPro = await this.cantidadProyectos(id);
+        if(usuario.plan == Plan.ELITE){
+            respuesta.maxPro = 50;
+        }else if (usuario.plan == Plan.ALLY) {
+            respuesta.maxPro = 30;
+        } else {
+            respuesta.maxPro = 15;
+        }
+        return respuesta;
+    }
+
+
 
 }

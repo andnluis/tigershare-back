@@ -8,7 +8,7 @@ export enum Plan {
 
 @Schema({versionKey: false})
 export class Usuario {
-
+    
     @Prop()
     nombre:string;
 
@@ -25,10 +25,13 @@ export class Usuario {
     plan:Plan;
 
     @Prop()
-    fnac:Date;
+    fnac?:Date;
 
     @Prop()
     pass:string;
+
+    cantPro? : number;
+    maxPro ? : number;
 }
 
 export const UsuarioSchema = SchemaFactory.createForClass(Usuario);

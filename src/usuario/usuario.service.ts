@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt'
 import { loginDTO } from './dto/loginDTO';
 import { UnauthorizedException } from '@nestjs/common/exceptions';
 import { Proyecto } from 'src/proyecto/schema/proyecto.schema';
+import { ProyectoService } from 'src/proyecto/proyecto.service';
 
 @Injectable()
 export class UsuarioService {
@@ -46,40 +47,35 @@ export class UsuarioService {
         }
         
         let token;
-
+        
         const passConcuerda = await bcrypt.compare(pass,usuario.pass); // Verifica si las contraseñas son iguales
         if(passConcuerda) {
             token = this.jwtService.sign({id:usuario._id, plan:usuario.plan});
         }else{
             throw new UnauthorizedException('Correo invalido o contraseña invalido');
         }
-
+        
         return { token }; //devolucion de token
-
+        
     }
-
+    
     async encontrarOCrear(profile):Promise<Usuario> {
         const usuario = await this.usuarioModelo.findOne({email:profile.email});
         if (usuario) {
             return usuario;
         }
         const nuevoUsuario = await this.usuarioModelo.create({
-            nombre: profile.name.givenName,
-            apellido: profile.name.familyName,
-            user: profile.givenName+profile.familyName,
-            email: profile.emails[0].value,
-            plan: 'Rookie',
-            fnac: profile.birthday
+            nombre: profile.nombre,
+            apellido: profile.apellido,
+            user: profile.user,
+            email: profile.email,
+            plan: 'Rookie'
         })
         return nuevoUsuario;
     }
 
-    async facebookLogin(req):Promise<{token:string}> {
-        if(!req.usuario) {
-            return { token: 'No hay usuario de facebook'}
-        }
-
-        const token = this.jwtService.sign({id:req.usuario._id})
+    async facebookLogin(usuario):Promise<{token:string}> {
+        const token = this.jwtService.sign({id:usuario._id})
         return { token };
     }
 
@@ -97,7 +93,7 @@ export class UsuarioService {
         const response = await this.usuarioModelo.findOne({email:email},{_id:1});
         return response.id;
     }
-
+    
     async obtenerIDporToken(token:string):Promise<string> {
         const decode = this.jwtService.verify(token);
         return decode.id;
@@ -108,6 +104,28 @@ export class UsuarioService {
     }> {
         const payload = this.jwtService.verify(token);
         return payload;
+    }
+    
+    async actualizarDatos(token: string, nombre:string, apellido:string, email: string, plan: string){
+        const id = await this.obtenerIDporToken(token);
+        const oid = new mongoose.mongo.ObjectId(id); //Object Id del proyecto
+        const usuario = this.usuarioModelo.updateOne({_id:oid},
+            {
+                nombre: nombre,
+                apellido: apellido, 
+                email: email,
+                plan:plan,
+            }
+            );
+            return usuario;
+        }
+
+    async cambiarContr(token:string, pass:string):Promise<any> {
+        const id = await this.obtenerIDporToken(token);
+        const oid = new mongoose.mongo.ObjectId(id);
+        const hashedPass = await bcrypt.hash(pass,10); //Encriptacion de la contraseña
+        const usuario = await this.usuarioModelo.updateOne({_id:oid},{pass:hashedPass});
+        return usuario;
     }
 
 }

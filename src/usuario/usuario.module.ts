@@ -8,7 +8,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { FacebookStrategy } from './strategies/facebook.strategy';
+import { ProyectoModule } from 'src/proyecto/proyecto.module';
 
 @Module({
   imports: [MongooseModule.forFeature([{name: 'Usuario', schema: UsuarioSchema}]), PassportModule.register({defaultStrategy: 'jwt'}), JwtModule.registerAsync({
@@ -24,7 +24,7 @@ import { FacebookStrategy } from './strategies/facebook.strategy';
     }
   })],
   controllers: [UsuarioController],
-  providers: [UsuarioService, JwtStrategy, FacebookStrategy],
+  providers: [UsuarioService, JwtStrategy],
   exports: [JwtStrategy, PassportModule, UsuarioService]
 })
 export class UsuarioModule {}

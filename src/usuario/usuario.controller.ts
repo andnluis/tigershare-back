@@ -1,10 +1,11 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, Headers, Put } from '@nestjs/common';
 import { loginDTO } from './dto/loginDTO';
 import { signupDTO } from './dto/signupDTO';
-import { Usuario } from './schema/usuario.schema';
+import { Plan, Usuario } from './schema/usuario.schema';
 import { UsuarioService } from './usuario.service';
 import { AuthGuard } from '@nestjs/passport';
+import { ProyectoService } from 'src/proyecto/proyecto.service';
 
 @Controller('usr')
 export class UsuarioController {
@@ -28,23 +29,35 @@ export class UsuarioController {
         return this.servicioUsuario.signUp(signupdto);
     }
 
-    @Get('facebook')
-    @UseGuards(AuthGuard('facebook'))
-    async facebookLogin(){
+    @Post('facebook')
+    async facebookLogin(@Body() body):Promise<{token:string}>{
+        const usuario = this.servicioUsuario.encontrarOCrear(body);
+        return await this.servicioUsuario.facebookLogin(usuario);
     }
 
-    @Get('facebook/callback')
-    @UseGuards(AuthGuard('facebook'))
-    async facebookLoginCallback(@Req() req){
-        return this.servicioUsuario.facebookLogin(req);
-    }
-
-    @Get(':token')
-    async obtenerDatos(@Param('token') token:string): Promise<Usuario> {
-        const id = await this.servicioUsuario.obtenerIDporToken(token);
+    @Get('/token')    
+    async datosUsuario(@Body() body:{token:string}):Promise<Usuario>{
+        const id = await this.servicioUsuario.obtenerIDporToken(body.token);
         const usuario = await this.servicioUsuario.obtenerPorID(id);
         return usuario;
     }
+
+
+    @Put('actualizar')
+    async actualizarDatos(@Headers() header, @Body() body) {
+        const usuario = await this.servicioUsuario.actualizarDatos(header.token, body.nombre, body.apellido, body.email, body.plan);
+        return usuario;
+    }
+
+    @Put('actualizar/pass')
+    async actualizarPass(@Headers() headers, @Body() body) {
+        const usuario = await this.servicioUsuario.cambiarContr(headers.token, body.pass)
+        if (usuario) {
+            return true;
+        }
+        return false;
+    }
+
 
 
 
