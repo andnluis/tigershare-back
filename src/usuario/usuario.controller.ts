@@ -23,7 +23,7 @@ export class UsuarioController {
         return this.servicioUsuario.signIn(logindto);
     }
 
-  //Endpoint para registrarse en la app
+    //Endpoint para registrarse en la app
     @Post('registrar')
     async registrarse(@Body() signupdto :signupDTO): Promise<{token: string}> {
         return this.servicioUsuario.signUp(signupdto);
@@ -32,13 +32,15 @@ export class UsuarioController {
     @Post('facebook')
     async facebookLogin(@Body() body):Promise<{token:string}>{
         const usuario = this.servicioUsuario.encontrarOCrear(body);
+        console.log(usuario);
         return await this.servicioUsuario.facebookLogin(usuario);
     }
 
-    @Get('/token')    
-    async datosUsuario(@Body() body:{token:string}):Promise<Usuario>{
-        const id = await this.servicioUsuario.obtenerIDporToken(body.token);
+    @Get('/:token')    
+    async datosUsuario(@Param('token') token:string):Promise<Usuario>{
+        const id = await this.servicioUsuario.obtenerIDporToken(token);
         const usuario = await this.servicioUsuario.obtenerPorID(id);
+        console.log(usuario);
         return usuario;
     }
 

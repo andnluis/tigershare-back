@@ -108,9 +108,9 @@ export class ProyectoController {
     }
 
     
-    @Get('/datos/usuario')
-    async obtenerDatos(@Headers() headers): Promise<datosPerfil> {
-        return await this.proyectoService.datosUsuario(headers.token);
+    @Get('/datos_usuario/:token')
+    async obtenerDatos(@Param('token') token:string): Promise<datosPerfil> {
+        return await this.proyectoService.datosUsuario(token);
     }
 
     
