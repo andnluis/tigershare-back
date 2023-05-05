@@ -50,7 +50,7 @@ export class UsuarioController {
         return usuario;
     }
 
-    @Put('actualizar/pass')
+    @Put('actualizarPassword/:token')
     async actualizarPass(@Param('token') token:string, @Body() body) {
         const usuario = await this.servicioUsuario.cambiarContr(token, body.pass)
         if (usuario) {
