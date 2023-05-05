@@ -40,20 +40,19 @@ export class UsuarioController {
     async datosUsuario(@Param('token') token:string):Promise<Usuario>{
         const id = await this.servicioUsuario.obtenerIDporToken(token);
         const usuario = await this.servicioUsuario.obtenerPorID(id);
-        console.log(usuario);
         return usuario;
     }
 
 
     @Put('actualizar')
-    async actualizarDatos(@Headers() header, @Body() body) {
-        const usuario = await this.servicioUsuario.actualizarDatos(header.token, body.nombre, body.apellido, body.email, body.plan);
+    async actualizarDatos(@Param('token') token:string, @Body() body) {
+        const usuario = await this.servicioUsuario.actualizarDatos(token, body.nombre, body.apellido, body.email, body.plan);
         return usuario;
     }
 
     @Put('actualizar/pass')
-    async actualizarPass(@Headers() headers, @Body() body) {
-        const usuario = await this.servicioUsuario.cambiarContr(headers.token, body.pass)
+    async actualizarPass(@Param('token') token:string, @Body() body) {
+        const usuario = await this.servicioUsuario.cambiarContr(token, body.pass)
         if (usuario) {
             return true;
         }
