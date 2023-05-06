@@ -59,9 +59,9 @@ export class UsuarioService {
         
     }
     
-    async encontrarOCrear(profile):Promise<Usuario> {
+    async encontrarOCrear(profile):Promise<any> {
         const usuario = await this.usuarioModelo.findOne({email:profile.email});
-
+        
         if (usuario) {
             return usuario;
         }

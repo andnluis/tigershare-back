@@ -31,14 +31,14 @@ export class UsuarioController {
 
     @Post('facebook')
     async facebookLogin(@Body() body:{nombre:string, apellido:string, user:string, email:string}):Promise<{token:string}>{
-        const usuario = this.servicioUsuario.encontrarOCrear(body);
+        const usuario = await this.servicioUsuario.encontrarOCrear(body);
         console.log(usuario);
         return await this.servicioUsuario.facebookLogin(usuario);
     }
 
-    @Get('/:token')    
-    async datosUsuario(@Param('token') token:string):Promise<Usuario>{
-        const id = await this.servicioUsuario.obtenerIDporToken(token);
+    @Get('/datos')    
+    async datosUsuario(@Headers() headers):Promise<Usuario>{
+        const id = await this.servicioUsuario.obtenerIDporToken(headers);
         const usuario = await this.servicioUsuario.obtenerPorID(id);
         return usuario;
     }
