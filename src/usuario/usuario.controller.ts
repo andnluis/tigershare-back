@@ -36,9 +36,9 @@ export class UsuarioController {
         return await this.servicioUsuario.facebookLogin(usuario);
     }
 
-    @Get('/datos')    
-    async datosUsuario(@Headers() headers):Promise<Usuario>{
-        const id = await this.servicioUsuario.obtenerIDporToken(headers);
+    @Get('/:token')    
+    async datosUsuario(@Param('token') token: string):Promise<Usuario>{
+        const id = await this.servicioUsuario.obtenerIDporToken(token);
         const usuario = await this.servicioUsuario.obtenerPorID(id);
         return usuario;
     }
