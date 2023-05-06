@@ -30,7 +30,7 @@ export class UsuarioController {
     }
 
     @Post('facebook')
-    async facebookLogin(@Body() body):Promise<{token:string}>{
+    async facebookLogin(@Body() body:{nombre:string, apellido:string, user:string, email:string}):Promise<{token:string}>{
         const usuario = this.servicioUsuario.encontrarOCrear(body);
         console.log(usuario);
         return await this.servicioUsuario.facebookLogin(usuario);

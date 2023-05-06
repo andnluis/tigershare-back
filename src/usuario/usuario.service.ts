@@ -76,7 +76,7 @@ export class UsuarioService {
     }
 
     async facebookLogin(usuario):Promise<{token:string}> {
-        const token = this.jwtService.sign({id:usuario._id})
+        const token = this.jwtService.sign({id:usuario._id, plan:usuario.plan})
         return { token };
     }
 
