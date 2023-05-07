@@ -52,7 +52,7 @@ export class ProyectoService {
         const id_usr = await this.servicioUsuario.obtenerIdPorEmail(email);
         if(id_usr){
             const oid_usr = new mongoose.mongo.ObjectId(id_usr);
-            this.modeloProyecto.updateOne({_id:oid_pro},{$push:{colaboradores:oid_usr}});
+            await this.modeloProyecto.updateOne({_id:oid_pro},{$push:{colaboradores:oid_usr}});
             return true;
         }
         return false;
@@ -77,7 +77,7 @@ export class ProyectoService {
 
     async obtenerProyectosColaborador(id:string):Promise<Proyecto[]> {
         const oid = new mongoose.mongo.ObjectId(id);
-        const proyectos = this.modeloProyecto.find({colaboradores:{$elemMatch:{$eq:oid}}});
+        const proyectos = await this.modeloProyecto.find({colaboradores:{$elemMatch:{$eq:oid}}});
         return proyectos;
     }
 
